@@ -41,7 +41,7 @@ class AnchorMiner:
         self.alphabet = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I',
                          'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
         
-        self.cluster_significance_threshold = 0.3
+        self.cluster_significance_threshold = 0.2
 
         self.clusters = {
         'aliphatic' : ['I','L', 'V','A'],
