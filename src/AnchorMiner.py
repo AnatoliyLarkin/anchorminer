@@ -297,7 +297,7 @@ class AnchorMiner:
             cluster_enrichment = cluster_ppm_freq / max(cluster_bg_freq, 1e-9)
 
 
-            if (self.KL[pos] >  self.threshold and cluster_enrichment > 1 and anchor_score>0):
+            if (self.KL[pos] >  self.threshold and cluster_enrichment > 1 and anchor_score>0) or pos in canonical_positions:
                 #anchor
 
 
