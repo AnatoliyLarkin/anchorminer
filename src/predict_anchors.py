@@ -4,12 +4,12 @@ import subprocess
 from src.AnchorMiner import AnchorMiner
 
 
-def predict_anchors(pept, hla, threshold, viz):
+def predict_anchors(pept, hla, viz):
 
 
 
     try:
-        AM = AnchorMiner(pept,hla,threshold,viz)
+        AM = AnchorMiner(pept,hla,viz)
     except Exception as e:
         raise ValueError(f'Could not initialize anchor miner: {e}')
     

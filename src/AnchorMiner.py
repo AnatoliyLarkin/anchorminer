@@ -15,16 +15,15 @@ class AnchorMiner:
         alphabet: List of 20 standard amino acids in fixed order.
         peptide: Input peptide sequence.
         HLA: HLA allele string in format HLA-X##:##.
-        threshold: KL divergence threshold for anchor calling.
         viz: True to include vizualizations (KL divergence per residue plot; motif logo); False otherwise
  
     Examples:
         ::
-            am = AnchorMiner('KLYDWWWWKKK', 'HLA-A03:01', 0.3, 'True')
+            am = AnchorMiner('KLYDWWWWKKK', 'HLA-A03:01', 'True')
             result = am.run_anchor_miner()
     """
  
-    def __init__(self, peptide, HLA, threshold,viz):
+    def __init__(self, peptide, HLA,viz):
         """Initializes AnchorMiner with peptide, HLA, threshold and mode.
  
         Args:
@@ -32,16 +31,44 @@ class AnchorMiner:
                      notation. Must consist of standard amino acids only.
             HLA: HLA allele string. Must contain 'HLA' and ':'.
                  Example: 'HLA-A02:01'.
-            threshold: KL divergence threshold for anchor detection.
-                       Float in range [0, 1].
             viz: Boolean. If True, generates KL divergence plot and sequence
                 logo with anchor positions highlighted. Red = canonical,
                 blue = non-canonical.
         """
-        self.alphabet = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I',
-                         'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
+
         
-        self.cluster_significance_threshold = 0.2
+
+        self.peptide = peptide
+
+        self.HLA = HLA
+
+        self.threshold = None
+
+        self.viz = viz
+        
+
+        self.background_freqs = {   #SwissProt UP000005640 human reference proteome
+                'A': 0.06931476059078986,
+                'R': 0.056170882331484255,
+                'N': 0.036195076141792314,
+                'D': 0.04818251017963055,
+                'C': 0.021861296219619214,
+                'Q': 0.048019751967746375,
+                'E': 0.07231789237051195,
+                'G': 0.06494460671756877,
+                'H': 0.02576145464468442,
+                'I': 0.04365335185624333,
+                'L': 0.09814793477006659,
+                'K': 0.05786301283117359,
+                'M': 0.021371307910138863,
+                'F': 0.03555159161944951,
+                'P': 0.06345179280475689,
+                'S': 0.08431773014272291,
+                'T': 0.05460829741282582,
+                'W': 0.01199139180834533,
+                'Y': 0.026158088532306913,
+                'V': 0.06011473943915862
+            }
 
         self.clusters = {
         'aliphatic' : ['I','L', 'V','A'],
@@ -57,11 +84,9 @@ class AnchorMiner:
         'amide' : ['Q','N'],
 
         }
-        self.peptide = peptide
-        self.HLA = HLA
-        self.threshold = threshold
-        self.viz = viz
 
+        self.alphabet = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I',
+                         'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
  
     def run_anchor_miner(self):
         """Runs the full anchor prediction pipeline.
@@ -128,12 +153,6 @@ class AnchorMiner:
                 'Example: HLA-A02:01'
             )
  
-        if (not isinstance(self.threshold, float)
-                or self.threshold < 0
-                or self.threshold > 1):
-            raise ValueError(
-                'Threshold must be a number'
-            )
  
         for aa in self.peptide:
             if aa not in self.alphabet:
@@ -192,8 +211,14 @@ class AnchorMiner:
         combination = f'{self.HLA}_{len(self.peptide)}'
         try:
             self.PWM = np.load(f'../datasets/PWM/PWM-{combination}.npy')
+
             self.KL = np.load(f'../datasets/KL/KL-{combination}.npy')
+
+            self.threshold = float(np.mean(self.KL) - 0.5* np.std(self.KL))
+
+
             self.PPM = np.load(f'../datasets/PPM/PPM-{combination}.npy')
+
         except Exception as e:
             raise ValueError(
                 f'Could not load data for {combination}: {e}. '
@@ -218,8 +243,12 @@ class AnchorMiner:
                 print(am.coords)  # e.g. [1, 8]
         """
         canonical_positions = {1, len(self.peptide) - 1}
-        anchor_positions = np.where(self.KL > self.threshold)[0]
- 
+
+
+        #candidate anchors 
+        anchor_positions = [i for i in range(len(self.peptide))]
+
+        
         results = []
         anchor_coords = []
 
@@ -248,14 +277,30 @@ class AnchorMiner:
             raise ValueError('Internal error: could not assign aminoacid to cluster')
         
 
+        
+
+
         for pos in anchor_positions:
 
             cluster_id = find_cluster_for_aminoacid(self.peptide[pos])
 
+            ppm_val = max(self.PPM[self.alphabet.index(self.peptide[pos]), pos], 1e-9)
+            anchor_score = np.log(ppm_val) - np.log(self.background_freqs[self.peptide[pos]])
 
-            cluster_freq = sum([self.PPM[self.alphabet.index(i), pos] for i in self.clusters[cluster_id]])
+            #cluster_freq = sum([self.PPM[self.alphabet.index(i), pos] for i in self.clusters[cluster_id]])
+            #cluster_significance_threshold = sum([self.background_freqs[i] for i in self.clusters[cluster_id]])
+           # print(self.peptide, self.HLA, pos, cluster_freq, cluster_significance_threshold)
 
-            if cluster_freq >= self.cluster_significance_threshold:
+
+            cluster_ppm_freq = sum([self.PPM[self.alphabet.index(i), pos] for i in self.clusters[cluster_id]])
+            cluster_bg_freq = sum([self.background_freqs[i] for i in self.clusters[cluster_id]])
+            cluster_enrichment = cluster_ppm_freq / max(cluster_bg_freq, 1e-9)
+
+
+            if (self.KL[pos] >  self.threshold and cluster_enrichment > 1 and anchor_score>0):
+                #anchor
+
+
                 is_anchor = True
 
                 if pos in canonical_positions:
@@ -273,8 +318,9 @@ class AnchorMiner:
                     'kl': float(round(self.KL[pos], 4)),
                     'type': 'canonical' if is_canonical else 'non-canonical',
                     'cluster': f'{cluster_id}({self.clusters[cluster_id]})',
-                    'cumulative cluster frequency': cluster_freq,
+                    'cumulative cluster frequency': cluster_ppm_freq,
                     'current_aa': self.peptide[pos],
+                    'anchor score': anchor_score,
                     'result': 'anchor' if is_anchor else 'not anchor'
                 })
 
@@ -283,7 +329,7 @@ class AnchorMiner:
  
             if is_anchor:
                 anchor_coords.append(int(pos))
- 
+
         self.res_verbose = results
         self.coords = anchor_coords
 
