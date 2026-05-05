@@ -145,13 +145,7 @@ class AnchorMiner:
         if not isinstance(self.peptide, str) or len(self.peptide) == 0:
             raise ValueError('Peptide must be a non-empty string.')
  
-        if (not isinstance(self.HLA, str)
-                or 'HLA' not in self.HLA
-                or ':' not in self.HLA):
-            raise ValueError(
-                'HLA must be a string in format HLA-X##:##. '
-                'Example: HLA-A02:01'
-            )
+
  
  
         for aa in self.peptide:
