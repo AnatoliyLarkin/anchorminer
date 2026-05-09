@@ -23,10 +23,10 @@ pip install -r requirements.txt
 from src.predict_anchors import predict_anchors
 
 # Without visualization
-result = predict_anchors('KILDGVFAV', 'HLA-A02:01', 0.3, viz=False)
+result = predict_anchors('KILDGVFAV', 'HLA-A02:01', viz=False)
 
 # With visualization — generates KL plot and sequence logo
-result = predict_anchors('KILDGVFAV', 'HLA-A02:01', 0.3, viz=True)
+result = predict_anchors('KILDGVFAV', 'HLA-A02:01', viz=True)
 
 # Access results
 print(result['coords'])   # anchor position indices (0-indexed)
@@ -40,8 +40,6 @@ print(result['verbose'])  # per-position details
 - `logo` — sequence logo with anchor positions highlighted in red (canonical) or blue (non-canonical) (only if viz=True)
 
 ---
-
-## Repository Structure
 
 ## Repository Structure
 ```
@@ -74,6 +72,5 @@ AnchorMiner/
 
 ## Notes
 
-- HLA allele format: `HLA-X##:##` e.g. `HLA-A02:01`. Use `src/standartize_hlas.normalize_allele()` to normalize non-standard inputs.
-- `threshold` controls KL divergence cutoff for candidate anchor position detection. Default `0.5` recommended; lower values detect more positions, higher values are more conservative.
-- Anchor confirmation uses biochemical cluster frequency — the cumulative PPM frequency of all amino acids in the same biochemical class as the peptide residue must exceed 0.3 at a candidate position. Applies to both canonical and non-canonical positions.
+- Homo sapiens HLA allele format: `HLA-X##:##` e.g. `HLA-A02:01`. Use `src/standartize_hlas.normalize_allele()` to normalize non-standard inputs. Only MHCI alleles are currently supported
+- Mus Musculus MHC format: `H:2:Kd`.
