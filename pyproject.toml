@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "anchorminer"
+version = "0.1.0"
+description = "MHC-I anchor position predictor using allele-specific PWMs"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "seaborn>=0.13",
+    "tqdm",
+    "biopython",
+    "logomaker",
+]
+
+[project.urls]
+Homepage = "https://github.com/AnatoliyLarkin/anchorminer"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["anchorminer*"]
+
+[tool.setuptools.package-data]
+anchorminer = ["datasets/**/*"]
