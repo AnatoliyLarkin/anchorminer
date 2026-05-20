@@ -28,4 +28,9 @@ where = ["."]
 include = ["anchorminer*"]
 
 [tool.setuptools.package-data]
-anchorminer = ["datasets/**/*"]
+anchorminer = [
+    "datasets/PWM/*.npy",
+    "datasets/PPM/*.npy",
+    "datasets/KL/*.npy",
+    "datasets/*.csv",
+]
