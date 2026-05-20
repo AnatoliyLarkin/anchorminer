@@ -22,6 +22,17 @@ datasets/structural_data/
 datasets/epitope_HLA_data.tsv
 datasets/allowed_hlas.csv
 
+anchorminer/datasets/immunogenicity_datasets/
+anchorminer/datasets/human_proteome/
+anchorminer/datasets/RunningMHCPan/
+anchorminer/datasets/structural_data/
+anchorminer/datasets/epitope_HLA_data.tsv
+anchorminer/datasets/allowed_hlas.csv
+anchorminer/datasets/mouse_proteome/
+anchorminer/datasets/raw_structural_data/
+anchorminer.egg-info/
+
+
 # Mono auto generated files
 mono_crash.*
 
