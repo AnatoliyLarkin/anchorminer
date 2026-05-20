@@ -1,22 +1,11 @@
-import numpy as np
-import sys
-import subprocess
-from src.AnchorMiner import AnchorMiner
+from .AnchorMiner import AnchorMiner
 
 
-def predict_anchors(pept, hla, viz):
-
-
-
+def predict_anchors(pept, hla, viz=False):
     try:
-        AM = AnchorMiner(pept,hla,viz)
+        AM = AnchorMiner(pept, hla, viz)
     except Exception as e:
         raise ValueError(f'Could not initialize anchor miner: {e}')
     
-    return(AM.run_anchor_miner())
-    
+    return AM.run_anchor_miner()
 
-
-
-if __name__ == '__main__':
-    predict_anchors()

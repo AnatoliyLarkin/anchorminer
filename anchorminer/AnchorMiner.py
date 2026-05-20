@@ -3,6 +3,8 @@ from pathlib import Path
 import logomaker
 import matplotlib.pyplot as plt
 import pandas as pd
+_DATASETS_DIR = Path(__file__).parent / "datasets"
+
 
 class AnchorMiner:
     """Predicts MHC-I anchor positions for a given peptide and HLA allele.
@@ -23,7 +25,7 @@ class AnchorMiner:
             result = am.run_anchor_miner()
     """
  
-    def __init__(self, peptide, HLA,viz):
+    def __init__(self, peptide, HLA,viz=False):
         """Initializes AnchorMiner with peptide, HLA, threshold and mode.
  
         Args:
@@ -44,7 +46,7 @@ class AnchorMiner:
 
         self.threshold = None
 
-        self.viz = viz
+        self.viz = bool(viz)
         
 
         self.background_freqs = {   #SwissProt UP000005640 human reference proteome
@@ -156,7 +158,7 @@ class AnchorMiner:
                 )
  
         try:
-            pwm_dir = Path('../datasets/PPM')
+            pwm_dir = _DATASETS_DIR / 'PPM'
             files = [f.name for f in pwm_dir.glob('*.npy')]
         except Exception as e:
             raise ValueError(
@@ -204,14 +206,12 @@ class AnchorMiner:
         """
         combination = f'{self.HLA}_{len(self.peptide)}'
         try:
-            self.PWM = np.load(f'../datasets/PWM/PWM-{combination}.npy')
-
-            self.KL = np.load(f'../datasets/KL/KL-{combination}.npy')
-
+            self.PWM = np.load(_DATASETS_DIR / 'PWM' / f'PWM-{combination}.npy')
+            self.KL  = np.load(_DATASETS_DIR / 'KL'  / f'KL-{combination}.npy')
+            self.PPM = np.load(_DATASETS_DIR / 'PPM' / f'PPM-{combination}.npy')
             self.threshold = float(np.mean(self.KL) - 0.5* np.std(self.KL))
 
 
-            self.PPM = np.load(f'../datasets/PPM/PPM-{combination}.npy')
 
         except Exception as e:
             raise ValueError(
