@@ -42,14 +42,18 @@ class AnchorMiner:
 
         self.peptide = peptide
 
-        self.HLA = HLA
+
 
         self.threshold = None
 
         self.viz = bool(viz)
         
 
-        self.background_freqs = {   #SwissProt UP000005640 human reference proteome
+
+        if 'HLA' in HLA:
+            #Human
+            self.HLA = ''.join(HLA.split('*'))
+            self.background_freqs = {   #SwissProt UP000005640 human reference proteome
                 'A': 0.06931476059078986,
                 'R': 0.056170882331484255,
                 'N': 0.036195076141792314,
@@ -71,6 +75,36 @@ class AnchorMiner:
                 'Y': 0.026158088532306913,
                 'V': 0.06011473943915862
             }
+
+
+        
+        else:
+            #mouse
+            self.HLA  = HLA[0] + ':' + HLA[1:].replace('-',':').replace('*','')
+            self.background_freqs = {
+                    'A': 0.06956053613967385,
+                    'R': 0.05651147986971378,
+                    'N': 0.03560841598937524,
+                    'D': 0.049105509940642424,
+                    'C': 0.021596642294743933,
+                    'Q': 0.04854159021670799,
+                    'E': 0.07167706430049334,
+                    'G': 0.06439172243627295,
+                    'H': 0.02554078451351855,
+                    'I': 0.04277194328318875,
+                    'L': 0.09971616809593346,
+                    'K': 0.05685846682784246,
+                    'M': 0.021548391068803546,
+                    'F': 0.0357153333233579,
+                    'P': 0.06267933125119186,
+                    'S': 0.08533769826755028,
+                    'T': 0.053980729435930644,
+                    'W': 0.01182029793286343,
+                    'Y': 0.02626969442669996,
+                    'V': 0.060760422182406904
+                }
+
+
 
         self.clusters = {
         'aliphatic' : ['I','L', 'V','A'],
@@ -431,4 +465,6 @@ class AnchorMiner:
             output['logo'] = self.logoplot
 
         return(output)
+
+
 

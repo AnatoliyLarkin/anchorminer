@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anchorminer"
-version = "0.1.1"
+version = "0.1.5"
 description = "MHC-I anchor position predictor using allele-specific PWMs"
 readme = "README.md"
 license = { file = "LICENSE" }
